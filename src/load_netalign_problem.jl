@@ -3,7 +3,8 @@ using MatrixNetworks
 function load_netalign_problem(probname)
 
 if probname == "lcsh2wiki-small"
-    mainloc = "../data/lcsh2wiki-small"
+    mainloc = joinpath(Pkg.dir("NetworkAlign"),"data/lcsh2wiki-small")
+    # mainloc = "../data/lcsh2wiki-small"
     location = join([mainloc,"_A.smat"])
     A = MatrixNetworks.readSMAT(location)
     
@@ -55,7 +56,8 @@ if probname == "lcsh2wiki-small"
     
 elseif probname == "example-overlap"
     
-    mainloc = "../data/example-overlap"
+    mainloc = joinpath(Pkg.dir("NetworkAlign"),"data/example-overlap")
+    # mainloc = "../data/example-overlap"
     location = join([mainloc,"_A.smat"])
     A = MatrixNetworks.readSMAT(location)
     
