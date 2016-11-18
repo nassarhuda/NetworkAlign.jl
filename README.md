@@ -2,10 +2,8 @@
 Network Alignment Algorithms in Julia
 * sample runs:
 ```
-include("load_netalign_problem.jl")
-include("netalignmr.jl")
-include("isorank.jl")
-include("netalignbp.jl")
+Pkg.clone("https://github.com/nassarhuda/NetworkAlign.jl")
+using NetworkAlign
 
 S,w,li,lj,A,B,L = load_netalign_problem("example-overlap")
 a = 1;
