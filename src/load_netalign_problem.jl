@@ -3,7 +3,7 @@ using MatrixNetworks
 function load_netalign_problem(probname)
 
 if probname == "lcsh2wiki-small"
-    mainloc = "julia_data/lcsh2wiki-small"
+    mainloc = "../data/lcsh2wiki-small"
     location = join([mainloc,"_A.smat"])
     A = MatrixNetworks.readSMAT(location)
     
@@ -55,7 +55,7 @@ if probname == "lcsh2wiki-small"
     
 elseif probname == "example-overlap"
     
-    mainloc = "julia_data/example-overlap"
+    mainloc = "../data/example-overlap"
     location = join([mainloc,"_A.smat"])
     A = MatrixNetworks.readSMAT(location)
     

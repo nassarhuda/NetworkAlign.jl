@@ -1,8 +1,3 @@
-using MatrixNetworks
-include("othermaxplus.jl")
-include("othersum.jl")
-include("round_messages.jl")
-
 """
 NETALIGNBP
 ----------

@@ -1,5 +1,3 @@
-using MatrixNetworks
-include("normout.jl")
 """
 ISORANK
 -------
