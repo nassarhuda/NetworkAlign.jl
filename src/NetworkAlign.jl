@@ -19,7 +19,11 @@ include("load_netalign_problem.jl")
 include("netalignmr.jl")
 include("isorank.jl")
 include("netalignbp.jl")
+include("count_overlap.jl")
+include("make_squares.jl")
+include("netalign_setup.jl")
 
-export load_netalign_problem, netalignmr, isorank, netalignbp
+export load_netalign_problem, netalignmr, isorank, netalignbp,
+        count_overlap, make_squares, netalign_setup, build_Si
 
 end # end module

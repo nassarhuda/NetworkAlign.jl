@@ -1,5 +1,5 @@
 # % MAKE_SQUARES Returns a list of all the squares between A, B, and L
-
+# Se,Le,LEw = make_squares(A,B,L,true); Si = build_Si(Se,Le);
 function make_squares(A::SparseMatrixCSC{Int64,Int64},B::SparseMatrixCSC{Int64,Int64},
                         L::SparseMatrixCSC{Int64,Int64},undirected::Bool)
 
