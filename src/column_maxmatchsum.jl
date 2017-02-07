@@ -7,12 +7,12 @@ type all_matching_output
     q::Vector{Float64}
     mi::Vector{Int64}
     mj::Vector{Int64}
-    medges::Int64    
+    medges::Int64
 end
 
 function intmatch(n::Int64,m::Int64,nedges::Int64,
                 v1::Vector{Int64},v2::Vector{Int64},weight::Vector{Float64})
-        
+
 
 l1 = zeros(Float64,n)
 l2 = zeros(Float64,n+m)
@@ -117,8 +117,8 @@ while i<=n
         for j = 1:p
             vtemp = s[j]
             vvtemp = l1[s[j]]
-			l1[s[j]] -= al;
-			vvtemp = l1[s[j]]
+            l1[s[j]] -= al
+            vvtemp = l1[s[j]]
         end
         for j = 1:ntmod
             l2[tmod[j]] += al
@@ -127,7 +127,7 @@ while i<=n
         i += 1
     end
 end
-    
+
 
 ret = 0.0
 for i = 1:n
@@ -155,7 +155,7 @@ end
 
 function column_maxmatchsum(M::Int64,N::Int64,Qp::Vector{Int64},Qr::Vector{Int64},Qv::Vector{Float64},
                                 m::Int64,n::Int64,nedges::Int64,li::Vector{Int64},lj::Vector{Int64})
-    
+
 minnm = n
 if m<minnm
     minnm = m
@@ -164,14 +164,14 @@ end
 q = zeros(Float64,N)
 mi = zeros(Int64,Qp[N]-1)
 mj = zeros(Int64,Qp[N]-1)
-    
+
 medges = 1
-    
+
 lwork1 = ones(Int64,m)
 lind1 = -1*ones(Int64,m)
 lwork2 = ones(Int64,n)
 lind2 = -1*ones(Int64,n)
-    
+
 max_col_nonzeros = 0
 for j = 1:N
     col_nonzeros = Qp[j+1] - Qp[j]
@@ -185,12 +185,12 @@ se2 = zeros(Int64,max_col_nonzeros)
 sw = zeros(Float64,max_col_nonzeros)
 sqi = zeros(Int64,max_col_nonzeros)
 sqj = zeros(Int64,max_col_nonzeros)
-    
+
 for j = 1:N
     smalledges = 1
     nsmall1 = 1
     nsmall2 = 1
-    
+
     for nzi = Qp[j]:Qp[j+1]-1
         i = Qr[nzi]
         v1 = li[i]
@@ -223,16 +223,16 @@ for j = 1:N
     nsmall1 -= 1
     nsmall2 -= 1
     smalledges -= 1
-    
+
     if smalledges==0
         q[j] = 0
         continue
     end
-    
+
     one_matching = intmatch(nsmall1,nsmall2,smalledges,se1,se2,sw)
     q[j] = one_matching.q
     smi = one_matching.mi
-    
+
     for k = 1:smalledges
         if smi[k] > 0
             mi[medges] = sqi[k]
@@ -240,20 +240,18 @@ for j = 1:N
             medges += 1
         end
     end
-    
+
     for k = 1:nsmall1
         lind1[lwork1[k]] = -1
     end
-    
+
     for k = 1:nsmall2
         lind2[lwork2[k]] = -1
     end
-    
+
 end
-    
+
 medges -= 1
 return all_matching_output(q,mi,mj,medges)
 
 end
-
- 
