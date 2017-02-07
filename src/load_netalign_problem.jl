@@ -95,15 +95,15 @@ elseif probname == "lcsh2wiki-full"
     # used vmat storage because the smat files were too big for github
     location = join([mainloc,"_li.vmat"])
     rows = readdlm(location)
-    li = convert(Array{Int64,1},rows)
+    li = convert(Array{Int64,1},rows[:])
 
     location = join([mainloc,"_lj.vmat"])
     rows = readdlm(location)
-    lj = convert(Array{Int64,1},rows)
+    lj = convert(Array{Int64,1},rows[:])
 
     location = join([mainloc,"_lw.vmat"])
     rows = readdlm(location)
-    lw = convert(Array{Int64,1},rows)
+    w = rows[:]
 
     # location = join([mainloc,"_li.smat"])
     # (rows,header) = readdlm(location;header=true)
