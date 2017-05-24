@@ -1,6 +1,6 @@
-function round_messages{T,F,R}(messages::Vector{Float64},
+function round_messages{T,F,R,K}(messages::Vector{Float64},
                         S::SparseMatrixCSC{T,Int64},w::Vector{F},
-                        alpha::R,beta::Int64,
+                        alpha::R,beta::K,
                         rp::Vector{Int64},ci::Vector{Int64},
                         tripi::Vector{Int64},n::Int64,
                         m::Int64,perm::Vector{Int64},
