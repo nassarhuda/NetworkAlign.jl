@@ -8,13 +8,13 @@ function normout(A::SparseMatrixCSC{T,Int64}) where T
   #
 
   # compute the row-sums/degrees
-#   d = sum(A,2)
-#   d = squeeze(d',1)
-#   id = 1./d
-#   P = spdiagm(id)*A
-#   return P
+  #   d = sum(A,2)
+  #   d = squeeze(d',1)
+  #   id = 1./d
+  #   P = spdiagm(id)*A
+  #   return P
 
-    S = vec(sum(A,2))
+    S = vec(sum(A,dims=2))
     ei,ej,ev = findnz(A)
     m,n = size(A)
     P = sparse(ei,ej,ev./S[ei],m,n)

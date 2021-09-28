@@ -35,9 +35,9 @@ end
 for i  = 2:n
     offset[i] = offset[i-1] + deg[i-1]
 end
-offset += 1
+offset .+= 1
 
-deg[:] = 0
+deg .= 0
 
 for i  = 1:nedges
     list[offset[v1[i]] + deg[v1[i]]] = v2[i]
