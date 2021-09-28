@@ -1,6 +1,8 @@
 module NetworkAlign
 
 using MatrixNetworks
+using SparseArrays
+using Printf
 
 """
 Module ``NetworkAlign``: Documentation on the module
@@ -8,7 +10,7 @@ Module ``NetworkAlign``: Documentation on the module
 You can check the readme file here: \n
 "https://github.com/nassarhuda/NetworkAlign.jl/blob/master/README.md"
 """
-NetworkAlign
+#NetworkAlign
 
 include("normout.jl")
 include("othermaxplus.jl")
