@@ -2,7 +2,11 @@ module NetworkAlign
 
 using MatrixNetworks
 using SparseArrays
-using Printf
+
+import Printf: @printf
+import DelimitedFiles: readdlm
+import LinearAlgebra: triu, dot, norm, issymmetric
+import KahanSummation: sum_kbn
 
 """
 Module ``NetworkAlign``: Documentation on the module
