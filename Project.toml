@@ -1,6 +1,6 @@
 name = "NetworkAlign"
 uuid = "0d28ce50-4895-482a-87a2-6d5a801cbd9e"
-authors = ["Charlie <ccolley@purdue.edu>"]
+authors = ["Huda Nassar <hnassar@purdue.edu>"]
 version = "0.1.0"
 
 [deps]
