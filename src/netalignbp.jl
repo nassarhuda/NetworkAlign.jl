@@ -12,7 +12,7 @@ function netalignbp(S::SparseMatrixCSC{T,Int64},w::Vector{F},
   nsquares = nnz(S)/2
   m = maximum(li)
   n = maximum(lj)
-  (sui, suj) = ind2sub(size(S),find(triu(S)))#only consider each square once.
+  SU = findall(x->x!=0,triu(S))#only consider each square once.
   
   #compute a vector that allows us to transpose data between squares.
   #Recall the BP algorithm requires edge(i,j) to send messages to edge(r,s)
@@ -20,14 +20,26 @@ function netalignbp(S::SparseMatrixCSC{T,Int64},w::Vector{F},
   #the information that (r,s) sent it from the previous iteraton.
   #If we imagine that each non-zero of S has a value, we want to tranpose
   #these values.
+
+  SI = spzeros(Int,size(S,1),size(S,1))
+  SI[SU] = 1:length(SU)
+  # this is faster than the old version of ind2sub, now SU is an array of CartesianIndex type
+  # SI = sparse(sui,suj,1:length(sui),size(S,1),size(S,2)) #assign indices
   
-  SI = sparse(sui,suj,1:length(sui),size(S,1),size(S,2)) #assign indices
   SI = SI + SI' #SI now has symmetric indices
-  (si, sj) = ind2sub(size(SI),find(SI))
-  sind = nonzeros(SI)
+  si = SI.rowval
+  sind = SI.nzval
+
+  # faster than:
+  # (si, sj) = ind2sub(size(SI),find(SI))
+  # sind = nonzeros(SI)
+  
   SP = sparse(si,sind,true,size(S,1),nsquares); # each column in SP has 2 nz
-  (sij, sijrs) = ind2sub(size(SP),find(SP))
-  sind = collect(1:nnz(SP))
+  
+  sij_cartesian = findall(x->x!=0,SP)
+  sij = [x.I[1] for x in sij_cartesian]
+  sijrs = [x.I[2] for x in sij_cartesian]
+
 
   spair = sind
   len_spair = length(spair)
@@ -74,38 +86,38 @@ function netalignbp(S::SparseMatrixCSC{T,Int64},w::Vector{F},
     prevsums = copy(sums)
     curdamp = damping * curdamp
 
-    omaxb = max((othermaxplus(2,li,lj,mb,m,n)),0)
-    omaxa = max((othermaxplus(1,li,lj,ma,m,n)),0)
+    omaxb = max.((othermaxplus(2,li,lj,mb,m,n)),0)
+    omaxa = max.((othermaxplus(1,li,lj,ma,m,n)),0)
 
     msflip = ms[spair] # swap ij->ijrs to rs->ijrs
 
-    mymsflip = msflip + beta
-    mymsflip = min(beta,mymsflip)
-    mymsflip = max(0,mymsflip)
+    mymsflip = msflip .+ beta
+    mymsflip = min.(beta,mymsflip)
+    mymsflip = max.(0,mymsflip)
 
     sums = zeros(Float64,nedges)
     for i = 1:length(sij)
         sums[sij[i]] += mymsflip[i]
     end
 
-    ma = alpha*w - omaxb + sums
-    mb = alpha*w - omaxa + sums
+    ma = alpha*w .- omaxb .+ sums
+    mb = alpha*w .- omaxa .+ sums
 
     ms = alpha*w[sij]-(omaxb[sij] + omaxa[sij])
-    ms = ms + othersum(sij,mymsflip,nedges)
+    ms = ms .+ othersum(sij,mymsflip,nedges)
     # Original updates
     if dtype == 1
-      ma = curdamp*(ma) + (1-curdamp)*(prevma)
-      mb = curdamp*(mb) + (1-curdamp)*(prevmb)
-      ms = curdamp*(ms) + (1-curdamp)*(prevms)
+      ma = curdamp*(ma) .+ (1-curdamp)*(prevma)
+      mb = curdamp*(mb) .+ (1-curdamp)*(prevmb)
+      ms = curdamp*(ms) .+ (1-curdamp)*(prevms)
     elseif dtype == 2
-      ma = ma + (1-curdamp)*(prevma+prevmb-alpha*w+prevsums)
-      mb = mb + (1-curdamp)*(prevmb+prevma-alpha*w+prevsums)
-      ms = ms + (1-curdamp)*(prevms+prevms[spair]-beta)
+      ma = ma .+ (1-curdamp)*(prevma.+prevmb.-alpha*w+prevsums)
+      mb = mb .+ (1-curdamp)*(prevmb.+prevma.-alpha*w+prevsums)
+      ms = ms .+ (1-curdamp)*(prevms.+prevms[spair].-beta)
     elseif dtype == 3
-      ma = curdamp*ma + (1-curdamp)*(prevma+prevmb-alpha*w+prevsums)
-      mb = curdamp*mb + (1-curdamp)*(prevmb+prevma-alpha*w+prevsums)
-      ms = curdamp*ms + (1-curdamp)*(prevms+prevms[spair]-beta)
+      ma = curdamp*ma .+ (1-curdamp)*(prevma.+prevmb.-alpha*w.+prevsums)
+      mb = curdamp*mb .+ (1-curdamp)*(prevmb.+prevma.-alpha*w.+prevsums)
+      ms = curdamp*ms .+ (1-curdamp)*(prevms.+prevms[spair].-beta)
     end
     
     # now compute the matchings
