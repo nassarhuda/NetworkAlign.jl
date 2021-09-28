@@ -2,15 +2,49 @@
 ISORANK
 -------
     solve an overlap matching problem with IsoRank
+    For details: [http://cb.csail.mit.edu/cb/mna/]
+    max  a*w'*x + b/2*x'*S*x
+    Usage
+    ----
+    x,flag,reshist = isorank(S,w,a,b,li,lj)
+    Input:
+    ----
+    - `S`: the complete set of squares
+    - `w`: the matching weights for all edges in the link graph L
+    - `a`: the value of a in the above equation
+    - `b`: the value of b in the above equation
+    - `li`: the start point of each edge in L
+    - `lj`: the end point of each edge in L
+    - `alpha`: same as alpha in the PageRank equation
+    - `rtype`: the rounding type (default 1)
+        * rtype = 1: only consider the current matching
+        * rtype = 2: enrich the matching with info from other squares
+    - `tol`: tolerance value
+    - `maxiter`: maximum number of iterations to take
+    - `verbose`: output at each iterations (default true)
+    Methods:
+    -------
+    x,flag,reshist = isorank(S,w,a,b,li,lj,alpha,rtype,tol,maxit,verbose)
+    x,flag,reshist = isorank(S,w,a,b,li,lj,alpha,rtype,tol,maxit)
+    x,flag,reshist = isorank(S,w,a,b,li,lj,alpha,rtype,tol)
+    x,flag,reshist = isorank(S,w,a,b,li,lj,alpha,rtype)
+    x,flag,reshist = isorank(S,w,a,b,li,lj,alpha)
+    x,flag,reshist = isorank(S,w,a,b,li,lj)
+    Example:
+    -------
+    S,w,li,lj = netalign_setup(A,B,L)
+    a = 0.2
+    b = 0.8
+    x,flag,reshist = isorank(S,w,a,b,li,lj)
+    ma,mb = edge_list(bipartite_matching(x,li,lj))
 """
-
-function isorank(S::SparseMatrixCSC{T,Int64},w::Vector{Float64},
-                 a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                 alpha::Float64,rtype::Int64,tol::Float64,
-                 maxit::Int64,verbose::Bool,P::SparseMatrixCSC{Float64,Int64}) where T
+function isorank(S::SparseMatrixCSC{T,Int},w::Vector{Float64},
+                 a::Q,b::Q,li::Vector{Int},lj::Vector{Int},
+                 alpha::Float64,rtype::Int,tol::Float64,
+                 maxit::Int,verbose::Bool,P::SparseMatrixCSC{R,Int}) where {T,Q,R}
   csum = sum_kbn(w)
   v = w./csum
-  assert(all(v.>=0))
+  @assert all(v.>=0)
   n = size(P,1)
 
   allstats = !isempty(li) && !isempty(lj)
@@ -43,7 +77,7 @@ function isorank(S::SparseMatrixCSC{T,Int64},w::Vector{Float64},
     y = r * (P' * x)
     omega = sum_kbn(x) - sum_kbn(y)
     y = y + omega * v
-    delta = vecnorm(x-y,1)
+    delta = norm(x-y,1)
     reshist[iter+1] = delta
     iter = iter + 1
     x = y * (1/sum_kbn(y))
@@ -85,6 +119,7 @@ function isorank(S::SparseMatrixCSC{T,Int64},w::Vector{Float64},
   end
   return (x,flag,reshist)
 end
+
 
 function isorank(S::SparseMatrixCSC{T,Int64},w::Vector{Float64},
                  a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
