@@ -1,4 +1,4 @@
-function normout{T}(A::SparseMatrixCSC{T,Int64})
+function normout(A::SparseMatrixCSC{T,Int64}) where T
   # NORMOUT Normalize the outdegrees of the matrix A.
   #
   # P = normout(A)

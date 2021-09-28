@@ -1,9 +1,9 @@
-type one_matching_output
+struct one_matching_output
     q::Float64
     mi::Vector{Int64}
 end
 
-type all_matching_output
+struct all_matching_output
     q::Vector{Float64}
     mi::Vector{Int64}
     mj::Vector{Int64}

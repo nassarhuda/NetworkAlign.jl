@@ -4,10 +4,10 @@ NETALIGNBP
     solve the network alignment problem with Belief Propagation
 """
 
-function netalignbp{T,F,R,K}(S::SparseMatrixCSC{T,Int64},w::Vector{F},
+function netalignbp(S::SparseMatrixCSC{T,Int64},w::Vector{F},
                             a::R,b::K,li::Vector{Int64},
                             lj::Vector{Int64},gam::Float64,
-                            dtype::Int64,maxiter::Int64,verbose::Bool)
+                            dtype::Int64,maxiter::Int64,verbose::Bool) where {T,F,R,K}
   nedges = length(li)
   nsquares = nnz(S)/2
   m = maximum(li)

@@ -1,10 +1,10 @@
-function round_messages{T,F,R,K}(messages::Vector{Float64},
+function round_messages(messages::Vector{Float64},
                         S::SparseMatrixCSC{T,Int64},w::Vector{F},
                         alpha::R,beta::K,
                         rp::Vector{Int64},ci::Vector{Int64},
                         tripi::Vector{Int64},n::Int64,
                         m::Int64,perm::Vector{Int64},
-                        li::Vector{Int64},lj::Vector{Int64})
+                        li::Vector{Int64},lj::Vector{Int64}) where {T,F,R,K}
   ai = zeros(Float64,length(tripi))
   ai[tripi.>0] = messages[perm]
   M_output = MatrixNetworks.bipartite_matching_primal_dual(rp,ci,ai,m,n)

@@ -1,5 +1,5 @@
-function othermaxplus{T}(dim::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        lw::Vector{T},m::Int64,n::Int64)
+function othermaxplus(dim::Int64,li::Vector{Int64},lj::Vector{Int64},
+                        lw::Vector{T},m::Int64,n::Int64) where T
   # OTHERMAXPLUS Apply the other-max-plus operator to a sparse matrix
   #
   # The other-max-plus operator applies the max-plus aggegration function
