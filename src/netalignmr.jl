@@ -1,13 +1,41 @@
 """
 NETALIGNMR
 ----------
-    solve the network alignment problem with Klau's algorithm
+    solve the network alignment problem with Klau's algorithm. 
+    For details: [https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-10-S1-S59]
+    Usage
+    ----
+    Input:
+    ----
+    - `S`: the complete set of squares
+    - `w`: the matching weights for all edges in the link graph L
+    - `a`: the value of alpha in the netalign objective
+    - `b`: the value of beta in the netalign objective
+    - `li`: the start point of each edge in L
+    - `lj`: the end point of each edge in L
+    - `gamma`: starting step value (default 0.25)
+    - `stepm`: number of non-decreasing iterations adjusting the step length (default 25)
+    - `rtype`: the rounding type (default 1)
+        * rtype = 1: only consider the current matching
+        * rtype = 2: enrich the matching with info from other squares
+    - `maxiter`: maximum number of iterations to take (default 1000)
+    - `verbose`: output at each iterations (default false)
+    Methods:
+    -------
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj,gamma,stepm,rtype,maxiter)
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj,gamma,stepm,rtype)
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj,gamma,stepm)
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj,gamma)
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj)
+    Example:
+    -------
+    S,w,li,lj = netalign_setup(A,B,L)
+    xbest,st,status,hist = netalignmr(S,w,a,b,li,lj)
+    ma,mb = edge_list(bipartite_matching(xbest,li,lj))
 """
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        gamma::Float64,stepm::Int64,rtype::Int64,maxiter::Int64,verbose::Bool)
-
+function netalignmr(S::SparseMatrixCSC{T,Int},w::Vector{Float64},
+                       a::Int,b::Int,li::Vector{Int},lj::Vector{Int},
+                        gamma::Float64=0.25,stepm::Int=25,rtype::Int=1,maxiter::Int=1000,verbose::Bool=false) where T
 
   m = maximum(li)
   n = maximum(lj)
@@ -29,8 +57,8 @@ function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
   hist = zeros(Float64,maxiter,7)
   iter = 1
   @inbounds for iter = 1:maxiter
-    Q = (b/2)*S + U-U'
-    Qt = Q'
+    Q = (b/2)*S + U-copy(U')
+    Qt = copy(Q')
     Qp = Qt.colptr
     Qr = Qt.rowval
     Qv = Qt.nzval
@@ -111,71 +139,35 @@ function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
             flower, fupper, val,
             f, matchval, card, overlap)
     end
-
     if iter == next_reduction_iteration
         gamma = gamma*0.5
-        
         # the below if statement causes type instability due to @printf being type instable
         if verbose
             @printf("%5s   %4s   reducing step to %f\n", "", "", gamma);
         end
         if gamma < 1e-24
+            hist = hist[1:iter,:]
             break
         end
         next_reduction_iteration = iter+stepm
     end
-
     if (fupper-flower) < 1e-2
+        hist = hist[1:iter,:]
         break
     end
-
     Wtemp = sparse(1:length(mi),1:length(mi),gamma*mi)
     U = U - Wtemp*triu(SM) + tril(SM)'*Wtemp
-    Utemp1 = spones(U)
+    Utemp1 = LinearAlgebra.fillstored!(copy(U), 1)
     Utemp1 *= 0.5
-    U = min(U,Utemp1)
+    U = min.(U,Utemp1)
     Utemp1 *= -1
-    U = max(U,Utemp1)
+    U = max.(U,Utemp1)
   end
   status = zeros(Float64,2)
   
   st = (fupper-flower) < 1e-2
   status[1] = flower
   status[2] = fupper
-  hist = hist[1:iter,:]
-  return (xbest,st,status,hist)
+  return xbest,st,status,hist
 
-end
-
-############################
-### Additional functions ###
-############################
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        gamma::Float64,stepm::Int64,rtype::Int64,maxiter::Int64)
-    return netalignmr(S,w,a,b,li,lj,gamma,stepm,rtype,maxiter,false)
-end
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        gamma::Float64,stepm::Int64,rtype::Int64)
-    return netalignmr(S,w,a,b,li,lj,gamma,stepm,rtype,1000,false)
-end
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        gamma::Float64,stepm::Int64)
-    return netalignmr(S,w,a,b,li,lj,gamma,stepm,1,1000,false)
-end
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64},
-                        gamma::Float64)
-    return netalignmr(S,w,a,b,li,lj,gamma,25,1,1000,false)
-end
-
-function netalignmr(S::SparseMatrixCSC{Int64,Int64},w::Vector{Float64},
-                       a::Int64,b::Int64,li::Vector{Int64},lj::Vector{Int64})
-    return netalignmr(S,w,a,b,li,lj,0.4,25,1,1000,false)
 end
